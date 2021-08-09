@@ -315,9 +315,6 @@ dir_output = dir_models
 
 os.chdir(dir_output)
 
-#TODO add docstring for data format
-
-
 # load data, which is already preprocessed and is a pickled dictionary with format:
 #   'date': Datetimeindex (No_of_timesteps,)
 #   'Variable': list (No_of_timesteps,)
@@ -366,7 +363,7 @@ SWVL3 = np.asarray(SWVL3Dict['SWVL3'])
 SWVL4 = np.asarray(SWVL4Dict['SWVL4'])
 
 # pickle file for Q contains only an array ('Q' time series) and a datetimeindex ('date')
-pickle_in = open(dir_data + '/' + 'QDict_XX_hourly_2012_2020.pickle','rb')
+pickle_in = open(dir_data + '/' + 'QDict.pickle','rb')
 QDict=pickle.load(pickle_in)
 Q = np.asarray(QDict['Q']) 
 
