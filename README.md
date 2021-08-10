@@ -7,7 +7,7 @@ doi of this repo:
 doi of according publication:  
 *will be added soon once discussion paper is published*
 
-This repository enables you to reproduce the results and apply the groundwater level forecasting methodology of: 
+This repository provides example model code according to: 
 
 **Wunsch, A., Liesch, T., Cinkus, G., Ravbar, N., Chen, Z., Mazzilli, N., Jourde, H., Goldscheider, N., Karst spring discharge modeling based on deep learning using
 spatially distributed input data (submitted to HESS, 2021)**
