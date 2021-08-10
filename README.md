@@ -2,7 +2,7 @@
 
 
 doi of this repo:  
-*will be added soon for frist release*
+*will be added soon for first release*
 
 doi of according publication:  
 *will be added soon once discussion paper is published*
