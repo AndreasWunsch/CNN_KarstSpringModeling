@@ -2,10 +2,10 @@
 
 
 doi of this repo:  
-*will be added soon*
+*will be added soon for frist release*
 
 doi of according publication:  
-*will be added soon*
+*will be added soon once discussion paper is published*
 
 This repository enables you to reproduce the results and apply the groundwater level forecasting methodology of: 
 
