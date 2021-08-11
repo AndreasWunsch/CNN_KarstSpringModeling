@@ -5,12 +5,11 @@ doi of this repo:
 *will be added soon for first release*
 
 doi of according publication:  
-*will be added soon once discussion paper is published*
+*https://doi.org/10.5194/hess-2021-403*
 
 This repository provides example model code according to: 
 
-**Wunsch, A., Liesch, T., Cinkus, G., Ravbar, N., Chen, Z., Mazzilli, N., Jourde, H., Goldscheider, N., Karst spring discharge modeling based on deep learning using
-spatially distributed input data (submitted to HESS, 2021)**
+**Wunsch, A., Liesch, T., Cinkus, G., Ravbar, N., Chen, Z., Mazzilli, N., Jourde, H., and Goldscheider, N.: Karst spring discharge modeling based on deep learning using spatially distributed input data, Hydrol. Earth Syst. Sci. Discuss. [preprint], https://doi.org/10.5194/hess-2021-403, in review, 2021.**
 
 Contact: [andreas.wunsch@kit.edu](andreas.wunsch@kit.edu)
 
