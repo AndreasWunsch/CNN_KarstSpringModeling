@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-.
 
 """
-@author: Andreas Wunsch, 2021
-MIT Licencse
-large parts from Sam Anderson (https://github.com/andersonsam/cnn_lstm_era)
-"""
+doi of according publication [preprint]:
+https://doi.org/10.5194/hess-2021-403
 
+Contact: andreas.wunsch@kit.edu
+ORCID: 0000-0002-0585-9549
+
+https://github.com/AndreasWunsch/CNN_KarstSpringModeling/
+MIT License
+
+large parts opf the code from Sam Anderson (https://github.com/andersonsam/cnn_lstm_era)
+see also: Anderson & Radic (2021): Evaluation and interpretation of convolutional-recurrent networks for regional hydrological modelling
+"""
 
 import pandas as pd
 import numpy as np
@@ -21,7 +28,7 @@ from scipy import interpolate
 
 #%% functions
 def bayesOpt_function():
-    # just a placeholder needed to load logs
+    # just a placeholder needed to load json logs
     return
 
 #%% 
@@ -161,8 +168,6 @@ def make_heat(model, x_test, y_test, style_dict, timesteps, iters_total, iters_o
 
 
 #%% Set directories and load data
-
-
 dir_data = './data_pickle' #where to save trained model outputs
 dir_models = './Results' #where to save trained model outputs
 dir_output = './heatmaps'
@@ -274,7 +279,6 @@ Qnorm = Qscaler.transform(pd.DataFrame(Q))
 
 #%% Define Bayesian Optimization to be able to load from existing logs:
 
-
 pbounds = {'steps_in': (1,10*4),
            'n': (7,7),
            'batchsize': (7,7),
@@ -289,10 +293,10 @@ pbounds = {'steps_in': (1,10*4),
            'inpSWVL4': (0,1)}
 
 optimizer = BayesianOptimization(
-    f= bayesOpt_function, #Funktion die optimiert wird
-    pbounds=pbounds, #Wertebereiche in denen optimiert wird
+    f= bayesOpt_function, 
+    pbounds=pbounds, 
     random_state=1, 
-    verbose = 0 # verbose = 1 prints only when a maximum is observed, verbose = 0 is silent, verbose = 2 prints everything
+    verbose = 0 
     )
 
 # #load existing optimizer
@@ -327,11 +331,9 @@ print("\nBEST:\t{}".format(maxDict))
 
 
 #%% Compile test data
-
 learning_rate = 1e-3
 training_epochs = 100   
 earlystopping_patience = 12
-
 
 nchannels = 1 + inpT + inpTsin + inpSMLT + inpE + inpSF + inpSWVL1 + inpSWVL2 + inpSWVL3 + inpSWVL4
 
@@ -398,7 +400,7 @@ for ii in range(Nval):
 for ii in range(Ntest):
   x_test[ii] = x_intermediate[ii + Ntrain + Nval + Nopt - steps_in : ii + Ntrain + Nval + Nopt]
 
-# #convert predict/target arrays to tensors
+# #convert target arrays to tensors
 x_train = tf.convert_to_tensor(x_train)
 x_val = tf.convert_to_tensor(x_val)
 x_test = tf.convert_to_tensor(x_test)
@@ -406,22 +408,18 @@ y_train = tf.convert_to_tensor(y_train)
 y_val = tf.convert_to_tensor(y_val)
 y_test = tf.convert_to_tensor(y_test)
 
-#create train/val/test datasets for model
-train_dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train)).shuffle(Ntrain).batch(batch_size)
-val_dataset = tf.data.Dataset.from_tensor_slices((x_val, y_val)).shuffle(Nval).batch(batch_size)
-test_dataset = tf.data.Dataset.from_tensor_slices((x_test, y_test)).shuffle(Ntest).batch(batch_size)
-
 #%% Load existing Models and calculate heatmaps
-with tf.device("/gpu:2"):
+with tf.device("/gpu:2"): # adapt to your available device
     
     for c in range(nchannels): #perturb one channel at a time
-        inimax = 10
-        heat = np.zeros((T.shape[1]*T.shape[2],inimax))
+    
+        inimax = 10 # use 10 different trained models
+        heat = np.zeros((T.shape[1]*T.shape[2],inimax)) # preallocate
         print(channel_names[c])
         for ini in range(inimax):
             
             fileName = dir_output + '/heatmap_'+channel_names[c]+'_channel_ini'+str(ini)+'.csv'
-            if os.path.isfile(fileName):
+            if os.path.isfile(fileName): # check for previous calculation runs to save time
                 temp_load = pd.read_csv(fileName,header=None)
                 temp = np.asarray(temp_load[0])
             else:
@@ -431,10 +429,6 @@ with tf.device("/gpu:2"):
                 
                 model_name = 'model_ERA5_ini' + str(ini)# + '.h5'
                 model = tf.keras.models.load_model(dir_models + '/' + model_name)
-                
-                # model = tf.keras.models.load_model(dir_models + '/' + model_name,compile=(False))
-                # model.compile(loss=custom_loss,
-                              # optimizer=tf.keras.optimizers.Adam(lr=1E-3))
                 print("model loading successful")
         
                 #parameters for heatmaps
@@ -456,7 +450,7 @@ with tf.device("/gpu:2"):
                                  iters_one_pass = iters_one_pass, 
                                  verbose = 0,
                                  tol = tol,
-                                 p_channel = c,
+                                 p_channel = c, # channel to pertubate, other are left as is
                                  batch_size = batch_size
                                  )
                  
@@ -471,4 +465,5 @@ with tf.device("/gpu:2"):
         fileName = 'heatmap_'+channel_names[c]+'_channel.csv'
         np.savetxt(dir_output + '/' + fileName, heat_mean, delimiter = ',')
         
+#save channel_names file for enx script: plot heatmaps
 np.savetxt(dir_output+'/channelnames.txt', channel_names,fmt='%s', delimiter = ',')

@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-@author: Andreas Wunsch
+doi of according publication [preprint]:
+https://doi.org/10.5194/hess-2021-403
+
+Contact: andreas.wunsch@kit.edu
+ORCID: 0000-0002-0585-9549
+
+https://github.com/AndreasWunsch/CNN_KarstSpringModeling/
+MIT License
 """
 
 import numpy as np
@@ -10,37 +17,31 @@ import os
 import geopandas as gpd
 from matplotlib import cm
 import matplotlib
+import matplotlib.ticker as plticker
 
 #%% Start - Load Data
 
-dir_data = './'
-dir_models = './'
-dir_output = dir_models
-
-os.chdir(dir_output)
-
 # load one pickle file for coordinates and data dimensions
-pickle_in = open(dir_data + '/' + 'TDict_ERA5land_large_1981-2018_daily.pickle','rb')
+pickle_in = open('./TDict_ERA5land_large_1981-2018_daily.pickle','rb')
 tempDict = pickle.load(pickle_in)
 T = np.asarray(tempDict['T'])
 
 #load file which includes channel names
-channel_names = np.genfromtxt(dir_output+'/channelnames.txt',dtype='str')
-import matplotlib.ticker as plticker
+channel_names = np.genfromtxt('./channelnames.txt',dtype='str')
 
-#%%
+#%% loop all chanels
 for channel in channel_names:
     fileName = 'heatmap_'+channel+'_channel.csv'
-    heat_mean = np.loadtxt(dir_output + '/' + fileName, delimiter=',')
+    heat_mean = np.loadtxt('./' + fileName, delimiter=',')
     
     fontsze = 16
     
-    #load Shapefile
-    shape = './catchment_shapefile.shp'
-    catchment_shape = gpd.read_file(shape)
-    
-    shape_eu = './coastline_shapefile.shp'
-    europe = gpd.read_file(shape_eu)
+    ##load Shapefiles you want to plot on your map. Be aware of the correct coordinate system
+    #shape = './catchment_shapefile.shp'
+    #catchment_shape = gpd.read_file(shape)
+    #
+    #shape_eu = './coastline_shapefile.shp'
+    #europe = gpd.read_file(shape_eu)
     
     #color scaling
     vmax = np.max(np.abs(heat_mean))
@@ -57,8 +58,8 @@ for channel in channel_names:
     fig, ax = pyplot.subplots(nrows = 1, ncols = 1, figsize = (7,7))
     im = ax.pcolormesh(np.asarray(lon1), np.asarray(lat1), heat_mean.reshape(np.shape(T[0])), shading='nearest',cmap = 'RdBu_r',vmin = vmin, vmax = vmax)
     
-    catchment_shape.plot(ax=ax,color = 'k',linewidth = 2.5)
-    europe.plot(ax=ax,color = 'k',alpha = 0.15)
+    #catchment_shape.plot(ax=ax,color = 'k',linewidth = 2.5)#
+    #europe.plot(ax=ax,color = 'k',alpha = 0.15)
     ax.set_aspect('equal')
     
     #ticking
@@ -72,13 +73,11 @@ for channel in channel_names:
     ax.tick_params(labelsize = fontsze-4)
     ax.set_xlabel('Longitude [$^\circ$E]', fontsize = fontsze)
     ax.set_ylabel('Latitude [$^\circ$N]', fontsize = fontsze)
-    
     ax.set_title('XX Spring, '+channel+' Channel', fontsize = fontsze+1, fontweight = 'bold')
-        
     ax.set_xlim((np.min(lon)-0.05, np.max(lon)+0.05))
     ax.set_ylim((np.min(lat)-0.05, np.max(lat)+0.05))
     
-     #colorbar
+    #colorbar
     cax = fig.add_axes([0.92, 0.21, 0.07, 0.6]) #colourbar gets own axis
     mapname = 'RdBu'
     cmap = cm.get_cmap(mapname)

@@ -1,9 +1,17 @@
 # -*- coding: utf-8 -*-.
 
 """
-@author: Andreas Wunsch, 2021
-MIT Licencse
-large parts from Sam Anderson (https://github.com/andersonsam/cnn_lstm_era)
+doi of according publication [preprint]:
+https://doi.org/10.5194/hess-2021-403
+
+Contact: andreas.wunsch@kit.edu
+ORCID: 0000-0002-0585-9549
+
+https://github.com/AndreasWunsch/CNN_KarstSpringModeling/
+MIT License
+
+large parts opf the code from Sam Anderson (https://github.com/andersonsam/cnn_lstm_era)
+see also: Anderson & Radic (2021): Evaluation and interpretation of convolutional-recurrent networks for regional hydrological modelling
 """
 
 import pandas as pd
@@ -28,10 +36,9 @@ from bayes_opt.util import load_logs
 
 
 #%% functions
-
-
 def nse(y_obs, y_model):
     """Nash Sutcliffe Efficieny."""
+    #TODO add docstring
     if not isinstance(y_obs, np.ndarray): #if tensor (or not array), convert to numpy array
       y_obs = np.array(y_obs)
     if not isinstance(y_model, np.ndarray):
@@ -41,26 +48,6 @@ def nse(y_obs, y_model):
     y_obs = y_obs.reshape((-1,1))
 
     nse = 1 - np.sum((y_model - y_obs)**2) / np.sum((y_obs - np.mean(y_obs))**2) #calculate NSE
-    return nse
-
-
-def nse_op(y_obs, y_model, ref):
-    """
-    Calculates modified Nash Sutcliffe Efficieny.
-    Takes additional argument 'ref' which is the mean value of an alternaitve reference period than the test period of the model
-    e.g. mean of the whole time series instead of the mean of the test set"""
-    if not isinstance(y_obs, np.ndarray): #if tensor (or not array), convert to numpy array
-      y_obs = np.array(y_obs)
-    if not isinstance(y_model, np.ndarray):
-      y_model = np.array(y_model)
-    if not isinstance(ref, np.ndarray):
-      ref = np.array(ref)
-
-    y_model = y_model.reshape((-1,1)) #make sure model and obs have same shape
-    y_obs = y_obs.reshape((-1,1))
-    ref = ref.reshape((-1,1))
-
-    nse = 1 - np.sum((y_model - y_obs)**2) / np.sum((y_obs - np.mean(ref))**2) #calculate NSE
     return nse
 
 class MCDropout(tf.keras.layers.Dropout):
@@ -220,10 +207,10 @@ def bayesOpt_function_with_discrete_params(n, steps_in, batch_size, inpT, inpTsi
     #training
     for ii in range(Ntrain-steps_in):
       x_train[ii] = x_intermediate[ii:ii+steps_in]
-    # #validation
+    #validation
     for ii in range(Nval):
       x_val[ii] = x_intermediate[ii + Ntrain - steps_in : ii + Ntrain]
-    # #optimizing ()
+    #optimization
     for ii in range(Nopt):
       x_opt[ii] = x_intermediate[ii + Ntrain + Nval - steps_in : ii + Ntrain + Nval]
     
@@ -280,16 +267,13 @@ def bayesOpt_function_with_discrete_params(n, steps_in, batch_size, inpT, inpTsi
             
             sim1 = model.predict(x_opt, batch_size = batch_size, verbose = 0)
             sim[:,ini] = sim1.reshape(-1,)
-    
-    
-    
         
     y_opt_sim = np.median(sim,axis = 1)
     pyplot.plot(y_opt,'k')
     pyplot.plot(y_opt_sim,alpha=0.7)
     pyplot.show()
     err = y_opt_sim-y_opt
-    MSE = np.mean(err ** 2)
+    MSE = np.mean(err ** 2) # - Mean Squared Error --> Objective Function
 
     return (-1)*MSE
 
@@ -299,7 +283,7 @@ def predict_distribution(X, model, n, batch_size):
     return np.hstack(preds)
 
 class newJSONLogger(JSONLogger) :
-#TODO add docstring
+#modifies existing logger, to contiguously log to existing json logs
       def __init__(self, path):
             self._path=None
             super(JSONLogger, self).__init__()
@@ -307,13 +291,10 @@ class newJSONLogger(JSONLogger) :
 
 
 #%% define paths and load data
-
-
 dir_data = './data_pickle' #where to save trained model outputs
 dir_models = './Results' #where to save trained model outputs
-dir_output = dir_models
 
-os.chdir(dir_output)
+os.chdir(dir_models)
 
 # load data, which is already preprocessed and is a pickled dictionary with format:
 #   'date': Datetimeindex (No_of_timesteps,)
@@ -421,7 +402,6 @@ Qnorm = Qscaler.transform(pd.DataFrame(Q))
 
 #%% Bayesian Optimization:
 
-
 # Bounded region of parameter space
 pbounds = {'steps_in': (1,10*4),
            'n': (6,8),
@@ -455,43 +435,27 @@ if os.path.isfile("./logs.json"):
     print("\nExisting optimizer is already aware of {} points.".format(len(optimizer.space)))
     log_already_available = 1
 
-# Save progress
+# Save progress to json logs
 logger = newJSONLogger(path="./logs.json")
 optimizer.subscribe(Events.OPTIMIZATION_STEP, logger)
 
 if log_already_available == 0:
     optimizer.maximize(
-            init_points=optsteps1, #steps of random exploration (random starting points before bayesopt(?))
+            init_points=optsteps1, #steps of random exploration (random starting points before bayesopt)
             n_iter=0, # steps of bayesian optimization
             acq="ei",# ei  = expected improvmenet (probably the most common acquisition function) 
             xi=0.05  #  Prefer exploitation (xi=0.0) / Prefer exploration (xi=0.1)
             )
 
-# optimize while improvement during last 10 steps
+# optimize while improvement during last 'optsteps3' steps
 current_step = len(optimizer.res)
 beststep = False
 step = -1
 while not beststep:
     step = step + 1
-    beststep = optimizer.res[step] == optimizer.max #aktuell beste Iteration suchen
-
-while current_step <= optsteps1: 
-        current_step = len(optimizer.res)
-        beststep = False
-        step = -1
-        while not beststep:
-            step = step + 1
-            beststep = optimizer.res[step] == optimizer.max
-        print("\nbeststep {}, current step {}".format(step+1, current_step+1))
-        print("new exploration step")
-        optimizer.maximize(
-            init_points=0, #steps of random exploration (random starting points before bayesopt(?))
-            n_iter=1, # steps of bayesian optimization
-            acq="ei",# ei  = expected improvmenet (probably the most common acquisition function) 
-            xi=0.1  #  Prefer exploitation (xi=0.0) / Prefer exploration (xi=0.1)
-            )
-        
-while current_step < optsteps2: 
+    beststep = optimizer.res[step] == optimizer.max #search for currently best Iteration
+    
+while current_step < optsteps2: # do not stop until 'optsteps2' is reached
         current_step = len(optimizer.res)
         beststep = False
         step = -1
@@ -505,8 +469,9 @@ while current_step < optsteps2:
             acq="ei",# ei  = expected improvmenet (probably the most common acquisition function) 
             xi=0.05  #  Prefer exploitation (xi=0.0) / Prefer exploration (xi=0.1)
             )
-        
-while (step + optsteps3 > current_step and current_step < optsteps4): # Abbruch bei 50 Iterationen oder wenn seit 10 keine Verbesserung mehr eingetreten ist
+            
+# stop if 'optsteps4' is reached or no improvement for 'optsteps3' steps        
+while (step + optsteps3 > current_step and current_step < optsteps4): 
         current_step = len(optimizer.res)
         beststep = False
         step = -1
@@ -701,17 +666,17 @@ obs1 = Y_test.reshape(-1,1)
 #calculate performance measures
 err = sim1-obs1
 err_rel = (sim1-obs1)/(np.max(Q)-np.min(Q))
-NSE = nse(obs1, sim1)
+NSE = nse(obs1, sim1) # Nash Sutcliffe
 try:
     r = stats.pearsonr(sim1[:,0], obs1[:,0])
 except:
     r = [np.nan, np.nan]
 r = r[0] #r
-R2 = r ** 2
-RMSE =  np.sqrt(np.mean(err ** 2))
-rRMSE = np.sqrt(np.mean(err_rel ** 2)) * 100
-Bias = np.mean(err)
-rBias = np.mean(err_rel) * 100
+R2 = r ** 2 # squared Pearson r, in this case similar to coeff. of Determination
+RMSE =  np.sqrt(np.mean(err ** 2)) # Root Mean Squared Error
+rRMSE = np.sqrt(np.mean(err_rel ** 2)) * 100 # Root Mean Squared Error relative
+Bias = np.mean(err) # Bias
+rBias = np.mean(err_rel) * 100 # Bias relative
 scores = pd.DataFrame(np.array([[NSE, R2, RMSE, rRMSE, Bias, rBias]]),
                columns=['NSE','R2','RMSE','rRMSE','Bias','rBias'])
 print(scores)
@@ -779,7 +744,6 @@ obs1 = Y_test.reshape(-1,1)
 
 err = sim1-obs1
 err_rel = (sim1-obs1)/(np.max(Q)-np.min(Q))
-# NSE = nse_op(obs1, sim1, Q[refInds,])
 NSE = nse(obs1, sim1)
 try:
     r = stats.pearsonr(sim1[:,0], obs1[:,0])
