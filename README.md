@@ -2,7 +2,7 @@
 
 
 doi of this repo:  
-*will be added soon for first release*
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5184692.svg)](https://doi.org/10.5281/zenodo.5184692)
 
 doi of according publication:  
 *https://doi.org/10.5194/hess-2021-403*
