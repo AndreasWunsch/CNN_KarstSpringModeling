@@ -5,13 +5,13 @@ doi of this repo:
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5184692.svg)](https://doi.org/10.5281/zenodo.5184692)
 
 doi of according publication:  
-*https://doi.org/10.5194/hess-2021-403*
+*https://doi.org/10.5194/hess-26-2405-2022*
 
 This repository provides example model code according to: 
 
-**Wunsch, A., Liesch, T., Cinkus, G., Ravbar, N., Chen, Z., Mazzilli, N., Jourde, H., and Goldscheider, N.: Karst spring discharge modeling based on deep learning using spatially distributed input data, Hydrol. Earth Syst. Sci. Discuss. [preprint], https://doi.org/10.5194/hess-2021-403, Accepted, 2022.**
+**Wunsch, A., Liesch, T., Cinkus, G., Ravbar, N., Chen, Z., Mazzilli, N., Jourde, H., and Goldscheider, N.: Karst spring discharge modeling based on deep learning using spatially distributed input data, Hydrol. Earth Syst. Sci., 26, 2405–2430, 2022, https://doi.org/10.5194/hess-26-2405-2022.**
 
-Contact: [andreas.wunsch@kit.edu](andreas.wunsch@kit.edu)
+Contact: [wunsch.andreas.edu@gmail.com](wunsch.andreas.edu@gmail.com)
 
 ORCIDs of first author:   
 A. Wunsch:  [0000-0002-0585-9549](https://orcid.org/0000-0002-0585-9549)   
