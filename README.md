@@ -5,7 +5,7 @@ doi of this repo:
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5184692.svg)](https://doi.org/10.5281/zenodo.5184692)
 
 doi of according publication:  
-*https://doi.org/10.5194/hess-26-2405-2022*
+[10.5194/hess-26-2405-2022](https://doi.org/10.5194/hess-26-2405-2022)
 
 This repository provides example model code according to: 
 
